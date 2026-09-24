@@ -51,29 +51,34 @@
 		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
 
 		<h2>Task 1: Drawing Single-Color Triangles</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
+		Rasterizing a triangle means determining the pixels that lie within it. First, vertices are put in a consistent order so that clockwise and counter-clockwise triangles are handled the same way. Next, select the set of pixels that lie within the triangle's bounding box, which is an area determined by the vertex positions.
+		This limits the scope because it is impossible for any pixels outside the bounding box to be covered by the triangle. Each pixel within this box is then sampled using its center point and checked for whether that point is inside the triangle. A point is considered inside the triangle if it lies on the inner side of all three edges. 
+		Points that are exactly on an edge are considered to be inside the triangle. 
+		<br>
+		<br>
+		Our implementation first computes the triangle's bounding box from the smallest and largest x/y coordinates of its vertices. It then loops over every pixel in that box, tests whether the pixel's center lies on the inner side of all three edges, and fills the pixel with the triangle's color if it does. This algorithm is not worse than one that checks each sample within the bounding box, because checking each sample within the bounding box is exactly what our implementation does, with a constant amount of work per pixel.
+
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
 				<td style="text-align: center;">
-				  <img src="assets/lion.jpg" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="assets/task1-test3-inspector.png" width="400px"/>
+				  <figcaption>basic/test3.svg: pixel inspector on the dragon's head</figcaption>
 				</td>
 				<td style="text-align: center;">
-				  <img src="assets/lion.jpg" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="assets/task1-test4-inspector.png" width="400px"/>
+				  <figcaption>basic/test4.svg: pixel inspector on the blue triangle's slanted edge, showing the staircase pattern</figcaption>
 				</td>
 			  </tr>
 			  <tr>
 				<td style="text-align: center;">
-				  <img src="assets/lion.jpg" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="assets/task1-test5-inspector.png" width="400px"/>
+				  <figcaption>basic/test5.svg: pixel inspector on the cube's top-right corner</figcaption>
 				</td>
 				<td style="text-align: center;">
-				  <img src="assets/lion.jpg" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="assets/task1-test6-inspector.png" width="400px"/>
+				  <figcaption>basic/test6.svg: pixel inspector on a star tip between two hexagons</figcaption>
 				</td>
 			  </tr>
 			</table>
