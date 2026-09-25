@@ -85,7 +85,33 @@
 		</div>
 		
 		<h2>Task 2: Antialiasing by Supersampling</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		The main data structure is the sample buffer, which is <code>std::vector< Color > </code> that stores a floating-point color for each sample. Each pixel's samples are stored next to each other, so when pixels are laid out row by row, a pixel's samples form one contiguous block. 
+			For triangles, we kept Task 1's algorithm with the supersampling modifications. Instead of running the tests on just one point in each pixel, we tested on sub-pixel sample points within each pixel. Each covered sample gets written into the sample buffer with the triangle's color.
+			<br>
+		Supersampling is useful because sampling once per pixel creates jagged edges and makes thin shapes break apart as pixels are only classified as fully colored or not colored at all. Supersampling allows partial coverage, so pixels along an edge can get blended colors. That smooths the edges and keeps thin shapes connected.
+		As a result, at sampling rate 1, the tip of the skinny magenta triangle breaks into disconnected pieces, because it's thinner than a pixel and most pixel centers miss it. At rate 4, more of the tip gets picked up, and partly covered pixels show lighter shades of magengta, so it starts to read as a contiguous line. This continues
+		with greater sampling rates. At rate 16, the tip fades out smoothly because we can represent many more levels of partial coverage.		 
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="assets/task2-test4-sr1.png" width="400px"/>
+				  <figcaption>basic/test4.svg at sample rate 1: pixel inspector on the skinny magenta triangle's tip</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="assets/task2-test4-sr4.png" width="400px"/>
+				  <figcaption>basic/test4.svg at sample rate 4</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td colspan="2" style="text-align: center;">
+				  <img src="assets/task2-test4-sr16.png" width="400px"/>
+				  <figcaption>basic/test4.svg at sample rate 16</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
 
 		<h2>Task 3: Transforms</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
