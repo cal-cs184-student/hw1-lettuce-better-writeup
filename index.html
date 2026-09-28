@@ -28,7 +28,7 @@
 	<body>
 		<div class="container">
 		<h1>CS184/284A Fall 2026 Homework 1 Write-Up</h1>
-		<div style="text-align: center;">Names: </div>
+		<div style="text-align: center;">Names: Loren Hung, Jim Fang </div>
 
 		<br>
 
@@ -36,7 +36,7 @@
 		
 		<br>
 
-		Link to GitHub repository: (TODO) <a href="https://cs184.eecs.berkeley.edu/fa26">cs184.eecs.berkeley.edu/fa26</a>
+		Link to GitHub repository: (TODO) <a href="https://github.com/cal-cs184-student/hw1-lettuce-better">github.com/cal-cs184-student/hw1-lettuce-better</a>
 
 		<figure>
 			<img src="assets/lion.jpg" alt="Lion" style="width:50%"/>
@@ -139,7 +139,42 @@
 		</div>
 
 		<h2>Task 5: "Pixel sampling" for texture mapping</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		Pixel sampling is a process used to determine what color a particular coordinate in texture space should be. For implementation, we first calculate the barycentric coordinates, then we use those barycentric coordinates to find the triangle's vertex UV (texture) coordinates. These are stored in a struct along with the sampling modes.
+
+		For nearest-neighbor sampling, we find the desired mipmap level from the given level. Then convert our UV coordinate into texel space. For nearest-neighbor, we floor the texel space coordinates to ensure that they are locked to a texture boundry. This is simple and cheap, however, can produce blocky results, since only a single texel contributes to each sample.
+
+		For bilinear sampling, we perform the same step above, however, after converting into texel space and getting the texture boundry, we find the texel centers by shifting the texel-space coordinates by -0.5. Then, using four neighboring texels around the sample position, we compute the fractional horizontal & vertical offsets. Our eventual result is a blend of the 4 nearby texels, leading to a smoother result than nearest-neighbor sampling at the cost of added complexity.
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 140%; max-width: 100vw; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="width: 50%; text-align: center;">
+				  <img src="assets/t5_nearest-sample-1-sample-per-pxl-screenshot_9-25_5-45-43.png" style="width: 100%; max-width: 560px;" alt="Texture mapping with nearest sampling at 1 sample per pixel"/>
+				  <figcaption>Nearest sampling, 1 sample per pixel</figcaption>
+				</td>
+				<td style="width: 50%; text-align: center;">
+				  <img src="assets/t5_nearest-sample-16-sample-per-pxl-screenshot_9-25_5-48-10.png" style="width: 100%; max-width: 560px;" alt="Texture mapping with nearest sampling at 16 samples per pixel"/>
+				  <figcaption>Nearest sampling, 16 samples per pixel</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="width: 50%; text-align: center;">
+				  <img src="assets/t5_bilinear-sample-1-sample-per-pxl-screenshot_9-25_5-46-21.png" style="width: 100%; max-width: 560px;" alt="Texture mapping with bilinear sampling at 1 sample per pixel"/>
+				  <figcaption>Bilinear sampling, 1 sample per pixel</figcaption>
+				</td>
+				<td style="width: 50%; text-align: center;">
+				  <img src="assets/t5_bilinear-sample-16-sample-per-pxl-screenshot_9-25_5-47-40.png" style="width: 100%; max-width: 560px;" alt="Texture mapping with bilinear sampling at 16 samples per pixel"/>
+				  <figcaption>Bilinear sampling, 16 samples per pixel</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+
+		<br>
+
+		The largest difference can be seen between the 1 sample per pixel nearest-neighbor vs bilinear sampling. In nearest sampling, we can clearly see more jagged vertical white lines that mark longitude and latitude (ex: next to Brazil).
+
+		This is expected. Nearest-neighbor sampling chooses only one texel, so textures can look blocky or jaged. Bilinear sampling blends the four surrounding texels, producing much smoother transitions. The difference is especially noticeable for transitions between highly different colors, such as the transition from blue ocean color to the white latitude and longitude lines.
 
 		<h2>Task 6: "Level Sampling" with mipmaps for texture mapping</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
