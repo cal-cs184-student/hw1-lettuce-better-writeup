@@ -32,23 +32,15 @@
 
 		<br>
 
-		Link to webpage: (TODO) <a href="https://cs184.eecs.berkeley.edu/fa26">cs184.eecs.berkeley.edu/fa26</a>
+		Link to webpage: <a href="https://cal-cs184-student.github.io/hw1-lettuce-better-writeup/">cal-cs184-student.github.io/hw1-lettuce-better-writeup</a>
 		
 		<br>
 
-		Link to GitHub repository: (TODO) <a href="https://github.com/cal-cs184-student/hw1-lettuce-better">github.com/cal-cs184-student/hw1-lettuce-better</a>
+		Link to GitHub repository: <a href="https://github.com/cal-cs184-student/hw1-lettuce-better">github.com/cal-cs184-student/hw1-lettuce-better</a>
 
 		<figure>
 			<img src="assets/lion.jpg" alt="Lion" style="width:50%"/>
-			<figcaption>You can add images with captions!</figcaption>
 		</figure>
-
-		<!--
-		We've already added one heading per task, to make your write-up as navigable when grading. Please fit your write-up within these sections!
-		-->
-
-		<h2>Overview</h2>
-		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
 
 		<h2>Task 1: Drawing Single-Color Triangles</h2>
 
@@ -68,7 +60,7 @@
 				</td>
 				<td style="text-align: center;">
 				  <img src="assets/task1-test4-inspector.png" width="400px"/>
-				  <figcaption>basic/test4.svg: pixel inspector on the blue triangle's slanted edge, showing the staircase pattern</figcaption>
+				  <figcaption>basic/test4.svg: pixel inspector on the skinny magenta triangle, showing the staircase pattern</figcaption>
 				</td>
 			  </tr>
 			  <tr>
@@ -85,11 +77,10 @@
 		</div>
 		
 		<h2>Task 2: Antialiasing by Supersampling</h2>
-		The main data structure is the sample buffer, which is <code>std::vector< Color > </code> that stores a floating-point color for each sample. Each pixel's samples are stored next to each other, so when pixels are laid out row by row, a pixel's samples form one contiguous block. 
-			For triangles, we kept Task 1's algorithm with the supersampling modifications. Instead of running the tests on just one point in each pixel, we tested on sub-pixel sample points within each pixel. Each covered sample gets written into the sample buffer with the triangle's color.
-			<br>
+		<p>The main data structure is the sample buffer, which is a <code>std::vector&lt;Color&gt;</code> that stores a floating-point color for each sample. Each pixel's samples are stored next to each other, so when pixels are laid out row by row, a pixel's samples form one contiguous block. The buffer holds <code>width * height * sample_rate</code> samples. We resize it when the window size or sample rate changes and clear it to white before drawing.</p>
+		<p>For triangles, we kept Task 1's algorithm with the supersampling modifications. Instead of running the tests on just one point in each pixel, we tested on sub-pixel sample points within each pixel, at the centers of a <code>sqrt(sample_rate) &times; sqrt(sample_rate)</code> grid. Each covered sample gets written into the sample buffer with the triangle's color. Points and lines fill all samples of each pixel they cover. After drawing, we average each pixel's samples and convert the result to 8 bits per RGB channel in the framebuffer.</p>
 		Supersampling is useful because sampling once per pixel creates jagged edges and makes thin shapes break apart as pixels are only classified as fully colored or not colored at all. Supersampling allows partial coverage, so pixels along an edge can get blended colors. That smooths the edges and keeps thin shapes connected.
-		As a result, at sampling rate 1, the tip of the skinny magenta triangle breaks into disconnected pieces, because it's thinner than a pixel and most pixel centers miss it. At rate 4, more of the tip gets picked up, and partly covered pixels show lighter shades of magengta, so it starts to read as a contiguous line. This continues
+		As a result, at sampling rate 1, the tip of the skinny magenta triangle breaks into disconnected pieces, because it's thinner than a pixel and most pixel centers miss it. At rate 4, more of the tip gets picked up, and partly covered pixels show lighter shades of magenta, so it starts to read as a contiguous line. This continues
 		with greater sampling rates. At rate 16, the tip fades out smoothly because we can represent many more levels of partial coverage.		 
 
 		<div style="display: flex; flex-direction: column; align-items: center;">
@@ -114,7 +105,7 @@
 		</div>
 
 		<h2>Task 3: Transforms</h2>
-		We made cubeman cheer with both arms raised in a "V". Each arm is a group that is moved to the shoulder and then rotated 45&deg; upward.
+		We made cubeman cheer with both arms raised in a "V". Each arm is a group positioned at the shoulder and rotated 45&deg; upward around it.
 		The forearm is nested inside that group, so it follows the same rotation and the whole arm moves as one piece.
 
 		<figure>
@@ -122,7 +113,7 @@
 		</figure>
 
 		<h2>Task 4: Barycentric coordinates</h2>
-		Barycentric coordinates represent a point inside a triangle using three weights, one for each vertex. Each vertex carries a color. The weights sum to 1 and increase as the point moves closer to their vertex, reaching 1 at the vertex and 0 on the opposite edge.
+		Barycentric coordinates represent a point inside a triangle using three weights, one for each vertex. Each vertex carries a color. The weights sum to 1 and vary linearly across the triangle, reaching 1 at their vertex and 0 on the opposite edge.
 		For each sample in the triangle, we calculate these weights and use them to interpolate the vertex colors. In the triangle below, the vertices are red, green, and blue, so the colors blend smoothly toward a roughly equal mixture near the center.
 
 		<div style="display: flex; flex-direction: column; align-items: center;">
@@ -130,40 +121,40 @@
 			  <tr>
 				<td style="text-align: center;">
 				  <img src="assets/task4-rgb-triangle.png" width="400px"/>
+				  <figcaption>Red, green, and blue vertex colors blended using barycentric coordinates</figcaption>
 				</td>
 				<td style="text-align: center;">
 				  <img src="assets/task4-test7.png" width="400px"/>
+				  <figcaption>basic/test7.svg: interpolated color wheel</figcaption>
 				</td>
 			  </tr>
 			</table>
 		</div>
 
 		<h2>Task 5: "Pixel sampling" for texture mapping</h2>
-		Pixel sampling is a process used to determine what color a particular coordinate in texture space should be. For implementation, we first calculate the barycentric coordinates, then we use those barycentric coordinates to find the triangle's vertex UV (texture) coordinates. These are stored in a struct along with the sampling modes.
-
-		For nearest-neighbor sampling, we find the desired mipmap level from the given level. Then convert our UV coordinate into texel space. For nearest-neighbor, we floor the texel space coordinates to ensure that they are locked to a texture boundry. This is simple and cheap, however, can produce blocky results, since only a single texel contributes to each sample.
-
-		For bilinear sampling, we perform the same step above, however, after converting into texel space and getting the texture boundry, we find the texel centers by shifting the texel-space coordinates by -0.5. Then, using four neighboring texels around the sample position, we compute the fractional horizontal & vertical offsets. Our eventual result is a blend of the 4 nearby texels, leading to a smoother result than nearest-neighbor sampling at the cost of added complexity.
+		<p>Pixel sampling is a process used to determine what color a particular coordinate in texture space should be. For implementation, we first calculate the barycentric coordinates, then we use those weights to interpolate the sample's UV (texture) coordinates from the triangle's vertex UV coordinates. These are stored in a struct along with the sampling modes.</p>
+		<p>For nearest-neighbor sampling, we use mipmap level 0, the full-resolution texture, for this task. Then we convert our UV coordinate into texel space by multiplying by the texture's width and height. We floor the texel-space coordinates to select the texel containing the point, whose center is nearest, keeping the indices within the texture bounds. This is simple and cheap, however, can produce blocky results, since only a single texel contributes to each sample.</p>
+		<p>For bilinear sampling, we convert into the same texel space and shift the coordinates by -0.5 to line up with texel centers. We then floor the coordinates to find the four neighboring texels around the sample position and compute the fractional horizontal and vertical offsets. Our eventual result is a blend of the 4 nearby texels, leading to a smoother result than nearest-neighbor sampling at the cost of added complexity.</p>
 
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 140%; max-width: 100vw; text-align: center; border-collapse: collapse;">
 			  <tr>
 				<td style="width: 50%; text-align: center;">
-				  <img src="assets/t5_nearest-sample-1-sample-per-pxl-screenshot_9-25_5-45-43.png" style="width: 100%; max-width: 560px;" alt="Texture mapping with nearest sampling at 1 sample per pixel"/>
+				  <img src="assets/task5-nearest-1spp.png" style="width: 100%; max-width: 560px;" alt="Texture mapping with nearest sampling at 1 sample per pixel"/>
 				  <figcaption>Nearest sampling, 1 sample per pixel</figcaption>
 				</td>
 				<td style="width: 50%; text-align: center;">
-				  <img src="assets/t5_nearest-sample-16-sample-per-pxl-screenshot_9-25_5-48-10.png" style="width: 100%; max-width: 560px;" alt="Texture mapping with nearest sampling at 16 samples per pixel"/>
+				  <img src="assets/task5-nearest-16spp.png" style="width: 100%; max-width: 560px;" alt="Texture mapping with nearest sampling at 16 samples per pixel"/>
 				  <figcaption>Nearest sampling, 16 samples per pixel</figcaption>
 				</td>
 			  </tr>
 			  <tr>
 				<td style="width: 50%; text-align: center;">
-				  <img src="assets/t5_bilinear-sample-1-sample-per-pxl-screenshot_9-25_5-46-21.png" style="width: 100%; max-width: 560px;" alt="Texture mapping with bilinear sampling at 1 sample per pixel"/>
+				  <img src="assets/task5-bilinear-1spp.png" style="width: 100%; max-width: 560px;" alt="Texture mapping with bilinear sampling at 1 sample per pixel"/>
 				  <figcaption>Bilinear sampling, 1 sample per pixel</figcaption>
 				</td>
 				<td style="width: 50%; text-align: center;">
-				  <img src="assets/t5_bilinear-sample-16-sample-per-pxl-screenshot_9-25_5-47-40.png" style="width: 100%; max-width: 560px;" alt="Texture mapping with bilinear sampling at 16 samples per pixel"/>
+				  <img src="assets/task5-bilinear-16spp.png" style="width: 100%; max-width: 560px;" alt="Texture mapping with bilinear sampling at 16 samples per pixel"/>
 				  <figcaption>Bilinear sampling, 16 samples per pixel</figcaption>
 				</td>
 			  </tr>
@@ -172,26 +163,41 @@
 
 		<br>
 
-		The largest difference can be seen between the 1 sample per pixel nearest-neighbor vs bilinear sampling. In nearest sampling, we can clearly see more jagged vertical white lines that mark longitude and latitude (ex: next to Brazil).
-
-		This is expected. Nearest-neighbor sampling chooses only one texel, so textures can look blocky or jaged. Bilinear sampling blends the four surrounding texels, producing much smoother transitions. The difference is especially noticeable for transitions between highly different colors, such as the transition from blue ocean color to the white latitude and longitude lines.
+		<p>The largest difference can be seen between the 1 sample per pixel nearest-neighbor vs bilinear sampling. In nearest sampling, we can clearly see more jagged white lines that mark longitude and latitude (ex: next to Brazil).</p>
+		<p>This is expected. Nearest-neighbor sampling chooses only one texel, so textures can look blocky or jagged. Bilinear sampling blends the four surrounding texels, producing much smoother transitions. The difference is especially noticeable for transitions between highly different colors, such as the transition from blue ocean color to the white latitude and longitude lines.</p>
+		<p>At 16 samples per pixel, both methods show smoother, more continuous lines. Averaging more samples reduces aliasing, so the difference between nearest and bilinear sampling is smaller.</p>
 
 		<h2>Task 6: "Level Sampling" with mipmaps for texture mapping</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		<p>Level sampling determines which texture resolution to use. Mipmaps store smaller, averaged versions of the original texture, which help reduce aliasing when many texels fit into one screen pixel. For implementation, we first calculate how much the UV coordinates change when moving one pixel in the x and y directions. Then we multiply these changes by the original texture's width and height and take the larger vector length, \(L\). We calculate the level as \(\log_2(\max(L,1))\), keeping it within the available mipmap levels.</p>
+		<p>For <code>L_ZERO</code>, we always use the original texture. For <code>L_NEAREST</code>, we round to the nearest level. For <code>L_LINEAR</code>, we sample the two surrounding levels and blend them based on the fractional part of the calculated level. Each level can use nearest or bilinear pixel sampling. Combining bilinear sampling with <code>L_LINEAR</code> gives trilinear filtering.</p>
+		<p>Nearest pixel sampling is cheap because it uses one texel, while bilinear sampling blends four for a smoother result without extra texture memory. Mipmaps use about 33% more texture memory for square textures, but reduce aliasing when the texture is shrunk. Linear level sampling samples twice as many texels to smooth transitions between levels. Supersampling smooths both triangle edges and textures, but the work and sample-buffer memory grow roughly with the number of samples per pixel.</p>
+		<p>In our images, <code>L_ZERO</code> with <code>P_NEAREST</code> shows jagged lines and unwanted patterns. Switching to <code>P_LINEAR</code> makes the transitions smoother. With <code>L_NEAREST</code>, fine details are averaged, but <code>P_NEAREST</code> still produces jagged edges within the texture. Using <code>L_NEAREST</code> with <code>P_LINEAR</code> gives smoother results, especially around the checkerboard and the center of the radial pattern, though some detail becomes blurry.</p>
 
-		<h2>(Optional) Task 7: Extra Credit - Draw Something Creative!</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="assets/task6-lzero-pnearest.png" width="400px"/>
+				  <figcaption>L_ZERO and P_NEAREST</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="assets/task6-lzero-plinear.png" width="400px"/>
+				  <figcaption>L_ZERO and P_LINEAR</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="assets/task6-lnearest-pnearest.png" width="400px"/>
+				  <figcaption>L_NEAREST and P_NEAREST</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="assets/task6-lnearest-plinear.png" width="400px"/>
+				  <figcaption>L_NEAREST and P_LINEAR</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
 
-		<h2>Additional Notes (please remove)</h2>
-		<ul>
-			<li>You can also add code if you'd like as so: <code>code code code</code></li>
-			<li>If you'd like to add math equations, 
-				<ul>
-					<li>You can write inline equations like so: \( a^2 + b^2 = c^2 \)</li>
-					<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
-				</ul>
-			</li>
-		</ul>
 		</div>
 	</body>
 </html>
